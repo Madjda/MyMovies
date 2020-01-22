@@ -4,8 +4,9 @@ import { StyleSheet,View, TextInput, Button , FlatList , Text  , ActivityIndicat
 import { getFilmsFromApiWithSearchedText } from '../API/TMDBApi' 
 // import { } from ... car c'est un export nommé dans TMDBApi.js
 import films from '../Helpers/filmsData' ; // No need only for test static
-import FilmItem from './FilmItem' ;
+import FilmItem from './FilmItem' ;    //Not used anymore here but in filmList component 
 import { connect } from 'react-redux'
+import FilmList from './FilmList' ; 
 
 
 
@@ -22,6 +23,7 @@ class Search extends React.Component {
           films: [] ,
           isLoading: false // Par défaut à false car il n'y a pas de chargement tant qu'on ne lance pas de recherche}
       }
+      this._loadFilms = this._loadFilms.bind(this)  // pour permettre au loadfilm d'acceder au contexte d Search qlqsoi son emplcm
     }
 
       _loadFilms() {
@@ -72,13 +74,15 @@ class Search extends React.Component {
       
         this._loadFilms()
       }
+ 
 
+      /*not used anymore.. moved to filmList compo
       _displayDetailForFilm = (idFilm) => {
       //  console.log("Display film with id " + idFilm) ;
         this.props.navigation.navigate("FilmDetail", { idFilm: idFilm }) ;
     
 
-    }
+    }*/
 
 
     render() {
@@ -90,7 +94,7 @@ class Search extends React.Component {
                            onSubmitEditing={() => this._searchFilms()}
                            />
                 <Button  tyle={styles.textinput} title='Search' onPress={() => this._searchFilms()}/>
-                <FlatList
+               {/* <FlatList
                             data={this.state.films}
                             // On utilise la prop extraData pour indiquer à notre FlatList 
                             //que d’autres données doivent être prises en compte si on lui demande de se re-rendre
@@ -111,15 +115,26 @@ class Search extends React.Component {
                                 this._loadFilms()
                               }
                         }}
-                />
+                      /> Old version of FlatList bellow as a reusable component*/}
+
+
+                  <FilmList
+                            films={this.state.films} // C'est bien le component Search qui récupère les films depuis l'API et on les transmet ici pour que le component FilmList les affiche
+                            navigation={this.props.navigation} // Ici on transmet les informations de navigation pour permettre au component FilmList de naviguer vers le détail d'un film
+                            loadFilms={this._loadFilms} // _loadFilm charge les films suivants, ça concerne l'API, le component FilmList va juste appeler cette méthode quand l'utilisateur aura parcouru tous les films et c'est le component Search qui lui fournira les films suivants
+                            page={this.page}
+                            totalPages={this.totalPages} // les infos page et totalPages vont être utile, côté component FilmList, pour ne pas déclencher l'évènement pour charger plus de film si on a atteint la dernière page
+                            favoriteList={false} // Ici j'ai simplement ajouté un booléen à false pour indiquer qu'on n'est pas dans le cas de l'affichage de la liste des films favoris. Et ainsi pouvoir déclencher le chargement de plus de films lorsque l'utilisateur scrol
+                          />
+
                  {this._displayLoading()}
-           { /* This function can be replaced by this but it's not that good return null etc ..
-           this.state.isLoading ?
-              <View style={styles.loading_container}>
-                <ActivityIndicator size='large' />
-              </View>
-              : null
-           */}
+                  { /* This function can be replaced by this but it's not that good return null etc ..
+                  this.state.isLoading ?
+                      <View style={styles.loading_container}>
+                        <ActivityIndicator size='large' />
+                      </View>
+                      : null
+                  */}
             </View>
         )
      }
@@ -148,6 +163,7 @@ const styles = StyleSheet.create({
     }
   })
 
+  /* No need for connecting search with store .. film list is connected 
   // On connecte le store Redux, ainsi que les films favoris du state de notre application, à notre component Search
   const mapStateToProps = (state) => {
     return {
@@ -157,3 +173,6 @@ const styles = StyleSheet.create({
 
   
   export default connect(mapStateToProps)(Search)
+  */
+
+  export default Search
