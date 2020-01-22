@@ -16,6 +16,7 @@ export default class App extends React.Component {
 }
 
 
+
 /*import { StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
