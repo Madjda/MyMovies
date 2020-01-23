@@ -10,13 +10,42 @@ import { connect } from 'react-redux'
 
 
 class FilmDetail extends React.Component {
+
+  static navigationOptions = ({ navigation }) => {
+    const { params } = navigation.state
+    // On accède à la fonction shareFilm et au film via les paramètres qu'on a ajouté à la navigation
+    if (params.film != undefined && Platform.OS === 'ios') {
+      return {
+          // On a besoin d'afficher une image, il faut donc passe par une Touchable une fois de plus
+          headerRight: <TouchableOpacity
+                          style={styles.share_touchable_headerrightbutton}
+                          onPress={() => params.shareFilm()}>
+                          <Image
+                            style={styles.share_image}
+                            source={require('../Images/share.png')} />
+                        </TouchableOpacity>
+      }
+    }
+}
+
+
   constructor(props) {
     super(props)
     this.state = {
       film: undefined,
       isLoading: true
     }
+     // Ne pas oublier de binder la fonction _shareFilm sinon, lorsqu'on va l'appeler depuis le headerRight de la navigation, this.state.film sera undefined et fera planter l'application
+     this._shareFilm = this._shareFilm.bind(this)
   }
+
+  // Fonction pour faire passer la fonction _shareFilm et le film aux paramètres de la navigation. Ainsi on aura accès à ces données au moment de définir le headerRight
+  _updateNavigationParams() {
+    this.props.navigation.setParams({
+      shareFilm: this._shareFilm,
+      film: this.state.film
+    })
+    }
 
   _displayFloatingActionButton() {
     const { film } = this.state
@@ -43,6 +72,7 @@ class FilmDetail extends React.Component {
     const action = { type: "TOGGLE_FAVORITE", value: this.state.film }
     this.props.dispatch(action)
 }
+ // Dès que le film est chargé, on met à jour les paramètres de la navigation (avec la fonction _updateNavigationParams) pour afficher le bouton de partage
 
 componentDidMount() {
   const favoriteFilmIndex = this.props.favoritesFilm.findIndex(item => item.id === this.props.navigation.state.params.idFilm)
@@ -50,18 +80,18 @@ componentDidMount() {
     // Pas besoin d'appeler l'API ici, on ajoute le détail stocké dans notre state global au state de notre component
     this.setState({
       film: this.props.favoritesFilm[favoriteFilmIndex]
-    })
+    }, () => { this._updateNavigationParams() })
     return
   }
   // Le film n'est pas dans nos favoris, on n'a pas son détail
   // On appelle l'API pour récupérer son détail
   this.setState({ isLoading: true })
-  getFilmDetailFromApi(this.props.navigation.state.params.idFilm).then(data => {
-    this.setState({
-      film: data,
-      isLoading: false
+    getFilmDetailFromApi(this.props.navigation.state.params.idFilm).then(data => {
+      this.setState({
+        film: data,
+        isLoading: false
+      }, () => { this._updateNavigationParams() })
     })
-  })
 }
 
   componentDidUpdate() {
@@ -202,6 +232,9 @@ share_touchable_floatingactionbutton: {
 share_image: {
   width: 30,
   height: 30
+},
+share_touchable_headerrightbutton: {
+  marginRight: 8
 }
 })
 const mapStateToProps = (state) => {
