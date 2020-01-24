@@ -23,9 +23,9 @@ class EnlargeShrink extends React.Component {
    //c'est l'endroit parfait pour lancer / relancer notre animation.
   componentDidMount() {
     Animated.spring(
-      this.state.positionLeft,
+      this.state.viewSize,
       {
-        toValue: this._getSize
+        toValue: this._getSize()
       }
     ).start()
   }
@@ -33,7 +33,7 @@ class EnlargeShrink extends React.Component {
   render() {
     return (
       <Animated.View
-        style={{ viewSize: this.state.viewSize }}>
+      style={{ width: this.state.viewSize, height: this.state.viewSize }}>
         {this.props.children}
       </Animated.View>
     )
