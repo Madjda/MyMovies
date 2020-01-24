@@ -115,9 +115,10 @@ componentDidMount() {
     //celui-ci s'agrandisse => shouldEnlarge à true
     if (this.props.favoritesFilm.findIndex(item => item.id === this.state.film.id) !== -1) {
       // Film dans nos favoris
-      sourceImage = require('../Images/favorite.png')
       shouldEnlarge = true
       // Si le film est dans les favoris, on veut qu'au clic sur le bouton, celui-ci se rétrécisse => shouldEnlarge à false
+      sourceImage = require('../Images/favorite.png')
+      
     }
     return (
       <EnlargeShrink
